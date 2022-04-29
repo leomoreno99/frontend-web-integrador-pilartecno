@@ -1,24 +1,27 @@
-import { Navigate, useRoutes } from 'react-router-dom';
-import DashboardLayout from "./layouts/DashboardLayout";
-import NotFound from "./layouts/NotFound";
-import Dashboard from "./dashboard/Dashboard";
-import Notes from "./notes/Notes";
-import Reports from "./reports/Reports";
+import {Form} from "./form/Form";
 
-const Routes = () => {
-  return useRoutes([
-    {
-      path: '/',
-      element: <DashboardLayout />,
-      children: [
-        { path: '', element: <Dashboard /> },
-        { path: 'notes', element: <Notes /> },
-        { path: 'reports', element: <Reports /> },
-      ]
-    },
-    {path: '/404', element: <NotFound/>},
-    {path:'*', element: <Navigate to="/404" replace/>}
-  ])
+import { Routes, Route } from 'react-router-dom';
+import {List} from "./list/List";
+import { styled } from "@mui/material";
+import { Box } from "@mui/system";
+
+const ContainerStyles =  styled(Box)`
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 150px;
+`
+
+const Routess = () => {
+  return(
+    <ContainerStyles>
+      <Routes>
+        <Route path={"/addPlace"} element={<Form />} />
+        <Route path={"/editPlace"} element={<Form />} />
+        <Route exact path={"/"} element={<List />} />
+      </Routes>
+    </ContainerStyles>
+  )
+
 }
 
-export default Routes;
+export default Routess;
