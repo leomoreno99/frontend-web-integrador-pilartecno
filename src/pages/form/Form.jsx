@@ -6,7 +6,10 @@ import { styled, TextField } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
-import { changeCreateNotification, creatPlace } from '../../redux/appRedux';
+import { changeCreateNotification, changeEditNotification, creatPlace, editPlace, placeById } from '../../redux/appRedux';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router';
 
 const FormStyles =  styled('div')`
     padding: 0 24px;
@@ -40,62 +43,113 @@ const validationSchema = yup.object({
       .max(250, 'La URL debe tener un maximo de 250 caracteres')
       .required('La URL es requerida'),
   latitude: yup
-    .number('La latitud debe ser un numero')
+    .string('asdasd')
+    // .number('La latitud debe ser un numero')
+    // .negative('asd')
     .min(2, 'La latitud es requerida')
     .required('La latitud es requerida'),
   longitude: yup
-    .number('La longitud debe ser un numero')
+    .string('asdasd')
+    // .number('La longitud debe ser un numero')
     .required('La longitud es requerida')
 });
 
 const createStructure = (values) => {
   const {name, description, imgUrl, latitude, longitude} = values
   const place = {
-    "name": name,
-    "description": description,
-    "imgUrl": [imgUrl],
-    "location":{
-      "latitude": Number(latitude),
-      "longitude": Number(longitude)
+    name: name,
+    description: description,
+    imgUrl: [imgUrl],
+    location:{
+      latitude: Number(latitude),
+      longitude: Number(longitude)
     }
   }
+  console.log(place.location.longitude)
+  console.log(typeof(place.location.longitude))
   return place
 }
 
 export const Form = () => {
+  const params = useParams()
+  const dispatcher = useDispatch()
 
+  // useEffect(()=>{
+  //   dispatcher(placeById(params.id))
+  // },[])
+
+  const [buttonName, setButtonName] = useState('Crear')
   const flagCreateNotification = useSelector(state => state.notificationsReducer.flagCreateNotification)
-    const { enqueueSnackbar } = useSnackbar();
+  const flagEditNotification = useSelector(state => state.notificationsReducer.flagEditNotification)
+  const flagCreateOrEdit = useSelector(state => state.functionalitiesReducer.flagCreateOrEdit)
+  const place = useSelector(state=>state.placesReducer.place)
+  let initialValues = {}
 
-    const dispatcher = useDispatch()
+  console.log(flagCreateOrEdit)
 
-    if(flagCreateNotification === 1){
-        enqueueSnackbar('Lugar creado exitosamente', { variant: 'success' });
-    } else if (flagCreateNotification === 2){
-        enqueueSnackbar('Error al intentar crear lugar', { variant: 'error' });
+  const setValues = () => {
+    if(flagCreateOrEdit === 1){
+      initialValues = {
+        name: `${place.name}`,
+        description: `${place.description}`,
+        imgUrl: `${place.imgUrl}`,
+        latitude: `${place.location[0].latitude}`,
+        longitude: `${place.location[0].longitude}`
+      }
+    } else if (flagCreateOrEdit === 0){
+      initialValues = {
+        name: '',
+        description: '',
+        imgUrl: '',
+        latitude: '',
+        longitude: ''
+      }
     }
-    dispatcher(changeCreateNotification(0))
+  }
+  setValues()
 
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(()=>{
+    if(flagCreateOrEdit === 1){
+      setButtonName('Editar')
+    } else if (flagCreateOrEdit === 0){
+      setButtonName('Crear')
+    }
+  }, [flagCreateOrEdit])
+
+  if(flagCreateNotification === 1){
+      enqueueSnackbar('Lugar creado exitosamente', { variant: 'success' });
+      dispatcher(changeCreateNotification(0))
+  } else if (flagCreateNotification === 2){
+      enqueueSnackbar('Error al intentar crear lugar', { variant: 'error' });
+      dispatcher(changeCreateNotification(0))
+  }
+
+  if(flagEditNotification === 1){
+    enqueueSnackbar('Lugar editado exitosamente', { variant: 'success' });
+    dispatcher(changeEditNotification(0))
+} else if (flagEditNotification === 2){
+    enqueueSnackbar('Error al intentar editar lugar', { variant: 'error' });
+    dispatcher(changeEditNotification(0))
+}
 
 
   const formik = useFormik({
-    initialValues: {
-      name: '',
-      description: '',
-      imgUrl: '',
-      latitude: null,
-      longitude: null
-
-    },
+    initialValues: initialValues,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      const place = JSON.stringify(createStructure(values))
-      console.log(place)
-      dispatcher(creatPlace(place))
-
+      const place_json = JSON.stringify(createStructure(values))
+      if(flagCreateOrEdit === 1){
+        console.log('editar: ', flagCreateOrEdit)
+        dispatcher(editPlace(place._id, place_json))
+      } else if (flagCreateOrEdit === 0){
+        console.log('crear: ', flagCreateOrEdit)
+        dispatcher(creatPlace(place_json))
+      }
     },
   });
-
+  
   return (
     <FormStyles>
       <form onSubmit={formik.handleSubmit}>
@@ -156,7 +210,7 @@ export const Form = () => {
         />
 
         <Button color="primary" variant="contained" fullWidth type="submit">
-          Crear
+          {buttonName}
         </Button>
       </form>
     </FormStyles>

@@ -1,7 +1,5 @@
 const execute = async (url, config = {}) => {
   try {
-    // const laP = JSON.parse(config.body)
-    console.log(config.body)
     const res = await fetch(url, config);
     return res.json();
   } catch (e) {
@@ -25,6 +23,7 @@ const post = async (url, body) => {
 const patch = async (url, body) => {
  return execute (url, {
   method: "PATCH",
+  headers: {'Content-Type': 'application/json'},
   body: body,
 })
 };

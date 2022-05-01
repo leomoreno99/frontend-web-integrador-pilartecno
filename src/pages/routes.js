@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import {List} from "./list/List";
 import { styled } from "@mui/material";
 import { Box } from "@mui/system";
+import { DetailPlace } from "./place/DetailPlace";
 
 const ContainerStyles =  styled(Box)`
     max-width: 1200px;
@@ -16,7 +17,8 @@ const Routess = () => {
     <ContainerStyles>
       <Routes>
         <Route path={"/addPlace"} element={<Form />} />
-        <Route path={"/editPlace"} element={<Form />} />
+        <Route path={"/editPlace/:id"} element={<Form />} />
+        <Route path={"/detailPlace/:id"} element={<DetailPlace />} />
         <Route exact path={"/"} element={<List />} />
       </Routes>
     </ContainerStyles>

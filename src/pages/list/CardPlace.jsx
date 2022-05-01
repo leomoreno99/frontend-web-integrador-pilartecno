@@ -5,13 +5,14 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import { CardActionArea, CardActions, IconButton, styled } from '@mui/material';
 // import product from '../../assets/images/products/product_11.jpg'
-import { Link } from 'react-router-dom';
+import { Link,  } from 'react-router-dom';
 import { DeleteOutline, EditOutlined } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
-import { changeDeleteNotification, delPlace } from '../../redux/appRedux';
+import { changeDeleteNotification, changeFlagCreateOrEdit, delPlace, placeById } from '../../redux/appRedux';
 import { useSnackbar } from 'notistack';
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
 
 const CardStyles =  styled(Card)`
     display: flex;
@@ -45,17 +46,26 @@ export const CardPlace = ({place}) => {
 
     const {name, description, imgUrl, _id} = place
     const dispatcher = useDispatch()
+
+    const navigate = useNavigate()
     
 
     if(flagDeleteNotification === 1){
         enqueueSnackbar('Lugar borrado exitosamente', { variant: 'success' });
+        dispatcher(changeDeleteNotification(0))
     } else if (flagDeleteNotification === 2){
         enqueueSnackbar('Error al intentar borrar lugar', { variant: 'error' });
+        dispatcher(changeDeleteNotification(0))
     }
-    dispatcher(changeDeleteNotification(0))
 
     const handleDeleteButton = () => {
         dispatcher(delPlace(_id))
+    }
+
+    const handleEditButton = async () => {
+        await dispatcher(changeFlagCreateOrEdit(1)); 
+        await dispatcher(placeById(_id))
+        await navigate(`/editPlace/${_id}`)
     }
 
     
@@ -63,7 +73,7 @@ export const CardPlace = ({place}) => {
   return (
         <CardStyles sx={{ maxWidth: 'maxContent' }}>
             <CardActionArea >
-            <Link style={{color: 'black', textDecoration: 'none'}} to={`/place/${_id}`} >
+            <Link style={{color: 'black', textDecoration: 'none'}} to={`/detailPlace/${_id}`} >
                 <CardMedia
                 component="img"
                 height="200"
@@ -84,7 +94,7 @@ export const CardPlace = ({place}) => {
             <IconButton onClick={()=> handleDeleteButton()} className='icon_button_delete' aria-label="deleteoutline" color="secondary" size='small' >
                 <DeleteOutline />
             </IconButton>
-            <IconButton onClick={()=> window.location.href = '/editPlace'} className='icon_button_edit' aria-label="editoutline" color="primary" size='small' >
+            <IconButton onClick={()=> handleEditButton()} className='icon_button_edit' aria-label="editoutline" color="primary" size='small' >
                 <EditOutlined />
             </IconButton>
             </CardActions>

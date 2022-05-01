@@ -21,7 +21,7 @@ export const List = () => {
     const places = useSelector((state) => state.placesReducer.places)
     const dispatcher = useDispatch()
 
-    console.log(places)
+    // console.log(places)
 
     useEffect(()=>{
         dispatcher(allPlaces())

@@ -1,43 +1,37 @@
-import { deletePlace, getAllPlaces, createPlace } from "../app/services/productService"
-
-const APP_TITLE = "APP_TITLE";
+import { deletePlace, getAllPlaces, createPlace, getPlaceById, updatePlace } from "../app/services/productService"
 
 const GET_ALL_PLACES = "GET_ALL_PLACES"
-const CREATE_PLACE = "CREATE_PLACE"
+const GET_PLACE_BY_ID = "GET_PLACE_BY_ID"
 const DELETE_PLACE = "DELETE_PLACE"
 
 const DELETE_NOTIFICATION = "DELETE_NOTIFICATION"
 const CREATE_NOTIFICATION = "CREATE_NOTIFICATION"
+const EDIT_NOTIFICATION = "EDIT_NOTIFICATION"
 
-const stateInitial = {
-  title: "Panel",
-};
+const CREATE_OR_EDIT_PLACE_CLICK = "CREATE_OR_EDIT_PLACE_CLICK"
 
 const initialStatePlaces = {
   places: [],
+  place: {}
 };
 
 const initialStateNotifications = {
   flagDeleteNotification: 0,
-  flagCreateNotification: 0
+  flagCreateNotification: 0,
+  flagEditNotification: 0
 };
+
+const initialStateFunctionalities = {
+  flagCreateOrEdit: 0,
+}
 
 //Reducers
-export const appReducer = (state = stateInitial, {type, payload}) => {
-  switch (type) {
-    case APP_TITLE:
-      return {...state, title: payload};
-    default:
-      return state;
-  }
-};
-
 export const placesReducer = (state = initialStatePlaces, {type, payload}) => {
   switch (type) {
     case GET_ALL_PLACES:
       return {...state, places: payload};
-    case CREATE_PLACE:
-      return {...state, places: payload};
+    case GET_PLACE_BY_ID:
+      return {...state, place: payload};
     case DELETE_PLACE:
       return {...state, places: payload};    
     default:
@@ -50,22 +44,25 @@ export const notificationsReducer = (state = initialStateNotifications, {type, p
     case DELETE_NOTIFICATION:
       return {...state, flagDeleteNotification: payload};
     case CREATE_NOTIFICATION:
-      return {...state, flagCreateNotification: payload};  
+      return {...state, flagCreateNotification: payload}; 
+    case EDIT_NOTIFICATION:
+      return {...state, flagEditNotification: payload};   
+    default:
+      return state;
+  }
+};
+
+export const functionalitiesReducer = (state = initialStateFunctionalities, {type, payload}) => {
+  console.log('payload: ', payload, 'Type: ', type)
+  switch (type) {
+    case CREATE_OR_EDIT_PLACE_CLICK:
+      return {...state, flagCreateOrEdit: payload}; 
     default:
       return state;
   }
 };
 
 //Actions
-export const setTitle = title => {
-  return dispatch => {
-    dispatch({
-      type: APP_TITLE,
-      payload: title
-    });
-  }
-}
-
 export const changeDeleteNotification = number => {
   return dispatch => {
     dispatch({
@@ -84,13 +81,34 @@ export const changeCreateNotification = number => {
   }
 }
 
+export const changeEditNotification = number => {
+  return dispatch => {
+    dispatch({
+      type: EDIT_NOTIFICATION,
+      payload: number
+    });
+  }
+}
+
+export const changeFlagCreateOrEdit = number => {
+  console.log('number: ', number)
+  return dispatch => {
+    dispatch({
+      type: CREATE_OR_EDIT_PLACE_CLICK,
+      payload: number
+    });
+  }
+}
+
+
+
 const getAllPlacesAction = (places) => ({
   type: GET_ALL_PLACES,
   payload: places,
 });
 
-const createPlacesAction = (places) => ({
-  type: CREATE_PLACE,
+const getPlaceByIdAction = (places) => ({
+  type: GET_PLACE_BY_ID,
   payload: places,
 });
 
@@ -110,6 +128,17 @@ export const allPlaces = () => {
   };
 };
 
+export const placeById = (id) => {
+  return async (dispatch) => {
+    try {
+      const place = await getPlaceById(id);
+      dispatch(getPlaceByIdAction(place));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+};
+
   export const creatPlace = (place) => {
     return async (dispatch) => {
       try {
@@ -119,6 +148,22 @@ export const allPlaces = () => {
           dispatch(changeCreateNotification(1))
         }
       } catch (e) {
+        dispatch(changeCreateNotification(2))
+        console.log(e);
+      }
+    };
+  }
+
+  export const editPlace = (id, place) => {
+    return async (dispatch) => {
+      try {
+        const response = await updatePlace(id, place)
+        if(response.code === 'OK'){
+          allPlaces()
+          dispatch(changeEditNotification(1))
+        }
+      } catch (e) {
+        dispatch(changeEditNotification(2))
         console.log(e);
       }
     };
