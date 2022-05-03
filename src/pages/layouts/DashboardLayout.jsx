@@ -99,7 +99,7 @@ const DashboardLayout = () => {
               size="small"
               sx={{ ml: 2 }}
             >
-              <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
+              <Avatar sx={{ width: 32, height: 32 }}>L</Avatar>
             </IconButton>
           </Toolbar>
         </AppBar>
